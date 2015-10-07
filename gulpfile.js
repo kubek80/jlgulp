@@ -8,6 +8,7 @@
 
 var config = {
 	jsConcatFiles: [
+		'./app/js/bower.js', //adding minified bower file
 		'./app/js/module1.js', 
 		'./app/js/main.js'
 	], 
@@ -36,7 +37,8 @@ var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	uglify = require('gulp-uglify'),
 	rename = require('gulp-rename'),
-	del = require('del');
+	del = require('del'),
+	mainBowerFiles = require('main-bower-files');
 
 
 // ////////////////////////////////////////////////
@@ -64,6 +66,18 @@ gulp.task('scripts', function() {
     .pipe(gulp.dest('./app/js/'))
 
     .pipe(reload({stream:true}));
+});
+
+// minification of bower components
+gulp.task('bower', function () {
+	return gulp.src(mainBowerFiles())
+		.pipe(sourcemaps.init())
+		.pipe(concat('temp.js'))
+		.pipe(uglify())
+		.on('error', errorlog)
+		.pipe(rename('bower.js'))
+		.pipe(sourcemaps.write('../maps'))
+		.pipe(gulp.dest('./app/js/'));
 });
 
 
@@ -152,6 +166,7 @@ gulp.task ('watch', function(){
 	gulp.watch('app/scss/**/*.scss', ['styles']);
 	gulp.watch('app/js/**/*.js', ['scripts']);
   	gulp.watch('app/**/*.html', ['html']);
+  	gulp.watch('bower.json', ['bower']); //rebuild bower.js file
 });
 
 
